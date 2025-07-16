@@ -1,0 +1,35 @@
+# English Translation for release.yml
+
+name: Publish a new version
+
+on:
+  push:
+    tags:
+      - 'v*' # This will only run when a tag starting with 'v' is pushed
+
+jobs:
+  build-and-release:
+    name: Create the release
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Get the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. This step will zip all project files into an archive,
+      #    excluding the .git and .github folders.
+      - name: Create project archive
+        run: zip -r project-${{ github.ref_name }}.zip . -x ".git/*" ".github/*"
+
+      # 3. Create the GitHub Release
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          # The token is provided by GitHub automatically
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Path to the files to attach to the release (our zip file)
+          artifacts: "project-${{ github.ref_name }}.zip"
+
+          # Automatically generates release notes from commit messages
+          generateReleaseNotes: true
