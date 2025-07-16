@@ -1,4 +1,5 @@
-name: Publier une nouvelle version
+# Nom du workflow
+name: Créer et Publier le Plugin
 
 on:
   push:
@@ -7,23 +8,27 @@ on:
 
 jobs:
   build-and-release:
-    name: Création de la release
+    name: Création de la Release
     runs-on: ubuntu-latest
     steps:
+      # Étape 1: Récupère le code source pour que le robot puisse travailler avec
       - name: Récupération du code
         uses: actions/checkout@v4
 
-      # --- MODIFICATION IMPORTANTE ICI ---
-      # On force le nom du fichier zip à être 'abcupdater.zip'
-      - name: Créer l'archive du plugin avec le nom correct
+      # Étape 2: Crée l'archive ZIP avec le nom EXACT "abcupdater.zip"
+      - name: Créer l'archive 'abcupdater.zip'
         run: zip -r abcupdater.zip . -x ".git/*" ".github/*"
 
-      - name: Créer la Release GitHub
+      # Étape 3: Crée la Release sur GitHub et attache notre fichier ZIP personnalisé
+      - name: Créer la Release et attacher l'archive
         uses: ncipollo/release-action@v1
         with:
+          # Le token est secret et géré automatiquement par GitHub
           token: ${{ secrets.GITHUB_TOKEN }}
           
-          # --- MODIFICATION IMPORTANTE ICI ---
-          # On dit au robot de chercher un fichier nommé 'abcupdater.zip' pour l'attacher
+          # C'est la ligne la plus importante.
+          # Elle dit au robot : "Trouve le fichier qui s'appelle 'abcupdater.zip' et joins-le à la release".
           artifacts: "abcupdater.zip"
+          
+          # Cette option génère les notes de version automatiquement. C'est très pratique.
           generateReleaseNotes: true
