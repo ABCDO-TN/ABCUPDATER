@@ -10,8 +10,15 @@ jobs:
   build-and-release:
     name: Création de la Release
     runs-on: ubuntu-latest
+
+    # --- L'AJOUT QUI VA TOUT RÉSOUDRE ---
+    # Donne explicitement la permission au robot d'écrire (créer) des releases.
+    permissions:
+      contents: write
+    # ------------------------------------
+
     steps:
-      # Étape 1: Récupère le code source pour que le robot puisse travailler avec
+      # Étape 1: Récupère le code source
       - name: Récupération du code
         uses: actions/checkout@v4
 
@@ -23,12 +30,6 @@ jobs:
       - name: Créer la Release et attacher l'archive
         uses: ncipollo/release-action@v1
         with:
-          # Le token est secret et géré automatiquement par GitHub
           token: ${{ secrets.GITHUB_TOKEN }}
-          
-          # C'est la ligne la plus importante.
-          # Elle dit au robot : "Trouve le fichier qui s'appelle 'abcupdater.zip' et joins-le à la release".
           artifacts: "abcupdater.zip"
-          
-          # Cette option génère les notes de version automatiquement. C'est très pratique.
           generateReleaseNotes: true
