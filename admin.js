@@ -48,4 +48,37 @@ jQuery(document).ready(function($) {
 
     // Initial index check on page load
     reindexProjects();
+
+    // Test Connection
+    $('#abcupdater-project-list').on('click', '.abcupdater-test-connection', function(e) {
+        e.preventDefault();
+        var $button = $(this);
+        var $projectBox = $button.closest('.abcupdater-project-box');
+        var $status = $projectBox.find('.abcupdater-test-status');
+        var repo = $projectBox.find('input[name*="[github_repo]"]').val();
+        var token = $projectBox.find('input[name*="[github_token]"]').val();
+
+        $status.removeClass('success error').text('Testing...');
+
+        $.ajax({
+            url: abcupdater_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'abcupdater_test_connection',
+                nonce: abcupdater_ajax.nonce,
+                repo: repo,
+                token: token
+            },
+            success: function(response) {
+                if (response.success) {
+                    $status.addClass('success').text(response.data.message);
+                } else {
+                    $status.addClass('error').text(response.data.message);
+                }
+            },
+            error: function() {
+                $status.addClass('error').text('An unknown error occurred.');
+            }
+        });
+    });
 });

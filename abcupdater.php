@@ -84,9 +84,11 @@ function abcupdater_projects_field_html() {
                         </p>
                         <p>
                             <label>License Key (GitHub Token)</label><br>
-                            <input type="password" name="abcupdater_settings[projects][<?php echo $index; ?>][github_token]" value="<?php echo esc_attr( $project['github_token'] ); ?>" size="50" />
+                            <input type="password" name="abcupdater_settings[projects][<?php echo $index; ?>][github_token]" value="<?php echo esc_attr( $project['github_token'] ); ?>" size="50" class="github-token-field" />
                         </p>
+                        <button type="button" class="button button-secondary abcupdater-test-connection">Test Connection</button>
                         <button type="button" class="button button-secondary abcupdater-remove-project">Remove Project</button>
+                        <span class="abcupdater-test-status"></span>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -115,9 +117,11 @@ function abcupdater_projects_field_html() {
             </p>
             <p>
                 <label>License Key (GitHub Token)</label><br>
-                <input type="password" name="abcupdater_settings[projects][__INDEX_RAW__][github_token]" value="" size="50" />
+                <input type="password" name="abcupdater_settings[projects][__INDEX_RAW__][github_token]" value="" size="50" class="github-token-field" />
             </p>
+            <button type="button" class="button button-secondary abcupdater-test-connection">Test Connection</button>
             <button type="button" class="button button-secondary abcupdater-remove-project">Remove Project</button>
+            <span class="abcupdater-test-status"></span>
         </div>
     </script>
     <?php
@@ -141,6 +145,9 @@ function abcupdater_settings_page_html() {
         .abcupdater-project-box { border: 1px solid #ccd0d4; padding: 10px 20px; margin-top: 15px; background: #fff; }
         .abcupdater-project-box h4 { margin-top: 5px; }
         #abcupdater-add-project { margin-top: 15px; }
+        .abcupdater-test-status { margin-left: 10px; font-weight: bold; }
+        .abcupdater-test-status.success { color: #28a745; }
+        .abcupdater-test-status.error { color: #dc3545; }
     </style>
     <?php
 }
@@ -150,6 +157,10 @@ function abcupdater_enqueue_admin_scripts( $hook ) {
         return;
     }
     wp_enqueue_script( 'abcupdater-admin-js', plugins_url( '/admin.js', __FILE__ ), [ 'jquery' ], '0.20.0', true );
+    wp_localize_script( 'abcupdater-admin-js', 'abcupdater_ajax', [
+        'ajax_url' => admin_url( 'admin-ajax.php' ),
+        'nonce'    => wp_create_nonce( 'abcupdater_test_connection_nonce' ),
+    ]);
 }
 add_action( 'admin_enqueue_scripts', 'abcupdater_enqueue_admin_scripts' );
 
@@ -293,7 +304,50 @@ add_filter( 'upgrader_post_install', 'abcupdater_cleanup_after_theme_update', 10
 
 
 // ===================================================================================
-// 5. PLUGIN SELF-UPDATER LOGIC
+// 5. AJAX HANDLER FOR CONNECTION TEST
+// ===================================================================================
+
+function abcupdater_test_connection_ajax_handler() {
+    check_ajax_referer( 'abcupdater_test_connection_nonce', 'nonce' );
+
+    $repo = isset( $_POST['repo'] ) ? sanitize_text_field( $_POST['repo'] ) : '';
+    $token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : '';
+
+    if ( empty( $repo ) ) {
+        wp_send_json_error( [ 'message' => 'Repository slug is required.' ] );
+    }
+
+    // Basic validation for "owner/repo" format
+    if ( ! preg_match( '/^[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+$/', $repo ) ) {
+        wp_send_json_error( [ 'message' => 'Invalid repository format. Use "owner/repo-name".' ] );
+    }
+    
+    list( $github_user, $repo_name ) = explode( '/', $repo );
+
+    $api_url = "https://api.github.com/repos/{$github_user}/{$repo_name}";
+    $headers = ['Accept' => 'application/vnd.github.v3+json'];
+    if ( ! empty( $token ) ) {
+        $headers['Authorization'] = 'token ' . $token;
+    }
+
+    $response = wp_remote_get( $api_url, ['headers' => $headers] );
+    $response_code = wp_remote_retrieve_response_code( $response );
+
+    if ( $response_code === 200 ) {
+        wp_send_json_success( [ 'message' => 'Connection successful!' ] );
+    } elseif ( $response_code === 404 ) {
+        wp_send_json_error( [ 'message' => 'Repository not found. Check the slug.' ] );
+    } elseif ( $response_code === 401 ) {
+        wp_send_json_error( [ 'message' => 'Authentication failed. Check your token.' ] );
+    } else {
+        wp_send_json_error( [ 'message' => "Error: Received HTTP code {$response_code}." ] );
+    }
+}
+add_action( 'wp_ajax_abcupdater_test_connection', 'abcupdater_test_connection_ajax_handler' );
+
+
+// ===================================================================================
+// 6. PLUGIN SELF-UPDATER LOGIC
 // ===================================================================================
 
 function abcupdater_check_for_plugin_self_update( $transient ) {
