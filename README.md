@@ -6,7 +6,7 @@
 ![PHP Version](https://img.shields.io/badge/PHP-7.4+-blueviolet)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-A powerful, flexible, and white-labeled WordPress plugin that provides a robust system for managing automatic updates for private themes hosted on GitHub. This plugin was created by **ABCDO & (Gemini Pro 2.5)**.
+A powerful, flexible, and white-labeled WordPress plugin that provides a robust system for managing automatic updates for private themes hosted on GitHub. This plugin was created by **ABCDO**.
 
 ---
 
@@ -90,5 +90,5 @@ This project is licensed under the MIT License.
 
 ## Acknowledgements
 
--   This plugin was created by **ABCDO** in collaboration with **Gemini Pro 2.5**.
+-   This plugin was created by **ABCDO**.
 -   Changelog parsing is powered by the [Parsedown](https://github.com/erusev/parsedown) library.
