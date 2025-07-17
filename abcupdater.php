@@ -1,26 +1,24 @@
 <?php
 /**
  * Plugin Name:       ABCUPDATER
- * Description:       Manages automatic updates for multiple themes and plugins from GitHub. Created by ABCDO.
- * Version:           0.12.0
+ * Description:       Manages automatic updates for multiple themes and plugins from private or public GitHub repositories.
+ * Version:           1.0.0
  * Requires at least: 5.5
  * Requires PHP:      7.4
- * Plugin URI:        http://abcdo.tn/abcupdate
+ * Plugin URI:        http://abcdo.tn/abcupdater
  * Author:            ABCDO
  * Author URI:        http://abcdo.tn
  * Text Domain:       abcupdater
  * License:           MIT
  */
 
-// Prevent direct file access
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 // ===================================================================================
 // 1. ACTIVATION REQUIREMENTS CHECK
 // ===================================================================================
 
+register_activation_hook( __FILE__, 'abcupdater_activation_check' );
 function abcupdater_activation_check() {
     $min_wp_version = '5.5';
     $min_php_version = '7.4';
@@ -36,30 +34,29 @@ function abcupdater_activation_check() {
         wp_die( sprintf( esc_html__( 'Could not activate %1$s. This plugin requires PHP version %2$s or later. Your site is running version %3$s.', 'abcupdater' ), '<strong>ABCUPDATER</strong>', esc_html( $min_php_version ), esc_html( PHP_VERSION ) ), 'Plugin Activation Error', [ 'back_link' => true ] );
     }
 }
-register_activation_hook( __FILE__, 'abcupdater_activation_check' );
 
 // ===================================================================================
 // 2. UPDATER SETTINGS PAGE
 // ===================================================================================
 
+add_action( 'admin_menu', 'abcupdater_add_admin_menu' );
 function abcupdater_add_admin_menu() {
     add_options_page('Update Manager', 'Update Manager', 'manage_options', 'abcupdater_settings', 'abcupdater_settings_page_html');
 }
-add_action( 'admin_menu', 'abcupdater_add_admin_menu' );
 
+add_action( 'admin_init', 'abcupdater_settings_init' );
 function abcupdater_settings_init() {
     register_setting( 'abcupdater_options', 'abcupdater_settings', 'abcupdater_sanitize_settings' );
     add_settings_section('abcupdater_main_section', 'GitHub Connection Settings', null, 'abcupdater_settings');
     add_settings_field('abcupdater_projects_field', 'Managed Projects', 'abcupdater_projects_field_html', 'abcupdater_settings', 'abcupdater_main_section');
 }
-add_action( 'admin_init', 'abcupdater_settings_init' );
 
 function abcupdater_projects_field_html() {
     $options = get_option( 'abcupdater_settings' );
     $projects = isset( $options['projects'] ) && is_array( $options['projects'] ) ? $options['projects'] : [];
     ?>
     <div id="abcupdater-projects-wrapper">
-        <p class="description">Add and configure all themes and plugins you want to manage updates for.</p>
+        <p class="description">Add and configure all themes and plugins you want to manage updates for from GitHub.</p>
         <div id="abcupdater-project-list">
             <?php if ( empty( $projects ) ) : ?>
                 <p id="abcupdater-no-projects">No projects configured. Click "Add Project" to start.</p>
@@ -68,22 +65,22 @@ function abcupdater_projects_field_html() {
                     <div class="abcupdater-project-box">
                         <h4>Project #<span class="project-index"><?php echo $index + 1; ?></span></h4>
                         <p>
-                            <label>Project Type</label><br>
+                            <label><strong>Project Type</strong></label><br>
                             <select name="abcupdater_settings[projects][<?php echo $index; ?>][type]">
                                 <option value="theme" <?php selected( $project['type'], 'theme' ); ?>>Theme</option>
                                 <option value="plugin" <?php selected( $project['type'], 'plugin' ); ?>>Plugin</option>
                             </select>
                         </p>
                         <p>
-                            <label>Local Folder/Slug</label><br>
+                            <label><strong>Local Directory / Plugin File</strong> (Slug)</label><br>
                             <input type="text" name="abcupdater_settings[projects][<?php echo $index; ?>][local_slug]" value="<?php echo esc_attr( $project['local_slug'] ); ?>" size="50" placeholder="e.g., my-theme or my-plugin/my-plugin.php" />
                         </p>
                         <p>
-                            <label>GitHub Repository</label><br>
+                            <label><strong>GitHub Repository</strong></label><br>
                             <input type="text" name="abcupdater_settings[projects][<?php echo $index; ?>][github_repo]" value="<?php echo esc_attr( $project['github_repo'] ); ?>" size="50" placeholder="e.g., owner/repo-name" />
                         </p>
                         <p>
-                            <label>License Key (GitHub Token)</label><br>
+                            <label><strong>GitHub Personal Access Token</strong></label><br>
                             <input type="password" name="abcupdater_settings[projects][<?php echo $index; ?>][github_token]" value="<?php echo esc_attr( $project['github_token'] ); ?>" size="50" class="github-token-field" />
                         </p>
                         <button type="button" class="button button-secondary abcupdater-test-connection">Test Connection</button>
@@ -96,27 +93,27 @@ function abcupdater_projects_field_html() {
         <button type="button" id="abcupdater-add-project" class="button button-primary">Add Project</button>
     </div>
 
-    <!-- JavaScript Template -->
+    <!-- JavaScript Template for new projects -->
     <script type="text/html" id="tmpl-abcupdater-project-template">
         <div class="abcupdater-project-box">
             <h4>Project #<span class="project-index">__INDEX__</span></h4>
             <p>
-                <label>Project Type</label><br>
+                <label><strong>Project Type</strong></label><br>
                 <select name="abcupdater_settings[projects][__INDEX_RAW__][type]">
                     <option value="theme" selected>Theme</option>
                     <option value="plugin">Plugin</option>
                 </select>
             </p>
             <p>
-                <label>Local Folder/Slug</label><br>
+                <label><strong>Local Directory / Plugin File</strong> (Slug)</label><br>
                 <input type="text" name="abcupdater_settings[projects][__INDEX_RAW__][local_slug]" value="" size="50" placeholder="e.g., my-theme or my-plugin/my-plugin.php" />
             </p>
             <p>
-                <label>GitHub Repository</label><br>
+                <label><strong>GitHub Repository</strong></label><br>
                 <input type="text" name="abcupdater_settings[projects][__INDEX_RAW__][github_repo]" value="" size="50" placeholder="e.g., owner/repo-name" />
             </p>
             <p>
-                <label>License Key (GitHub Token)</label><br>
+                <label><strong>GitHub Personal Access Token</strong></label><br>
                 <input type="password" name="abcupdater_settings[projects][__INDEX_RAW__][github_token]" value="" size="50" class="github-token-field" />
             </p>
             <button type="button" class="button button-secondary abcupdater-test-connection">Test Connection</button>
@@ -132,7 +129,7 @@ function abcupdater_settings_page_html() {
     ?>
     <div class="wrap">
         <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-        <p>This system allows for secure, direct updates for your themes and plugins from GitHub.</p>
+        <p>This system allows for secure, direct updates for your themes and plugins from private or public GitHub repositories.</p>
         <form action="options.php" method="post">
             <?php
             settings_fields( 'abcupdater_options' );
@@ -142,8 +139,8 @@ function abcupdater_settings_page_html() {
         </form>
     </div>
     <style>
-        .abcupdater-project-box { border: 1px solid #ccd0d4; padding: 10px 20px; margin-top: 15px; background: #fff; }
-        .abcupdater-project-box h4 { margin-top: 5px; }
+        .abcupdater-project-box { border: 1px solid #ccd0d4; padding: 10px 20px; margin-top: 15px; background: #fff; border-radius: 4px; }
+        .abcupdater-project-box h4 { margin-top: 5px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         #abcupdater-add-project { margin-top: 15px; }
         .abcupdater-test-status { margin-left: 10px; font-weight: bold; }
         .abcupdater-test-status.success { color: #28a745; }
@@ -152,23 +149,26 @@ function abcupdater_settings_page_html() {
     <?php
 }
 
+add_action( 'admin_enqueue_scripts', 'abcupdater_enqueue_admin_scripts' );
 function abcupdater_enqueue_admin_scripts( $hook ) {
     if ( 'settings_page_abcupdater_settings' !== $hook ) {
         return;
     }
-    wp_enqueue_script( 'abcupdater-admin-js', plugins_url( '/admin.js', __FILE__ ), [ 'jquery' ], '0.20.0', true );
+    // Use the correct path for the js file
+    wp_enqueue_script( 'abcupdater-admin-js', plugins_url( 'js/admin-scripts.js', __FILE__ ), [ 'jquery' ], '1.0.0', true );
     wp_localize_script( 'abcupdater-admin-js', 'abcupdater_ajax', [
         'ajax_url' => admin_url( 'admin-ajax.php' ),
         'nonce'    => wp_create_nonce( 'abcupdater_test_connection_nonce' ),
     ]);
 }
-add_action( 'admin_enqueue_scripts', 'abcupdater_enqueue_admin_scripts' );
-
 
 function abcupdater_sanitize_settings( $input ) {
     $new_input = [];
     if ( isset( $input['projects'] ) && is_array( $input['projects'] ) ) {
-        foreach ( $input['projects'] as $project ) {
+        // Re-index the array to prevent gaps from removed projects
+        $projects = array_values( $input['projects'] );
+
+        foreach ( $projects as $project ) {
             if ( empty( $project['local_slug'] ) && empty( $project['github_repo'] ) ) {
                 continue; // Skip empty entries
             }
@@ -176,7 +176,9 @@ function abcupdater_sanitize_settings( $input ) {
                 'type'         => sanitize_text_field( $project['type'] ),
                 'local_slug'   => sanitize_text_field( $project['local_slug'] ),
                 'github_repo'  => sanitize_text_field( $project['github_repo'] ),
-                'github_token' => sanitize_text_field( $project['github_token'] ),
+                // Do not sanitize the token here, as it might contain special characters.
+                // It will be sanitized right before use.
+                'github_token' => trim( $project['github_token'] ),
             ];
             $new_input['projects'][] = $sanitized_project;
         }
@@ -188,6 +190,13 @@ function abcupdater_sanitize_settings( $input ) {
 // 3. UPDATE CHECKER LOGIC
 // ===================================================================================
 
+/**
+ * Generic update checker for both themes and plugins.
+ *
+ * @param object $transient The transient object.
+ * @param string $type      The type of project to check ('theme' or 'plugin').
+ * @return object The modified transient.
+ */
 function abcupdater_check_for_updates( $transient, $type ) {
     if ( empty( $transient->checked ) ) { return $transient; }
 
@@ -202,27 +211,31 @@ function abcupdater_check_for_updates( $transient, $type ) {
     $Parsedown = new Parsedown();
 
     foreach ( $options['projects'] as $project ) {
-        if ( $project['type'] !== $type ) {
+        // Skip if the project type doesn't match the current check, or if data is incomplete
+        if ( $project['type'] !== $type || empty( $project['local_slug'] ) || empty( $project['github_repo'] ) ) {
             continue;
         }
 
         $local_slug = $project['local_slug'];
+        
+        // Skip if this specific project is not in the list of items WordPress is checking
+        if ( ! isset( $transient->checked[ $local_slug ] ) ) {
+            continue;
+        }
+
         $github_repo = $project['github_repo'];
         $github_token = $project['github_token'];
 
-        if ( empty( $local_slug ) || empty( $github_repo ) || ! isset( $transient->checked[ $local_slug ] ) ) {
+        // Basic validation for "owner/repo" format
+        if ( ! preg_match( '/^[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+$/', $github_repo ) ) {
             continue;
         }
-
         list( $github_user, $repo_name ) = explode( '/', $github_repo );
-        if ( empty( $github_user ) || empty( $repo_name ) ) {
-            continue;
-        }
 
         $api_url = "https://api.github.com/repos/{$github_user}/{$repo_name}/releases/latest";
         $headers = ['Accept' => 'application/vnd.github.v3+json'];
         if ( ! empty( $github_token ) ) {
-            $headers['Authorization'] = 'token ' . $github_token;
+            $headers['Authorization'] = 'token ' . sanitize_text_field($github_token);
         }
 
         $response = wp_remote_get( $api_url, ['headers' => $headers] );
@@ -232,7 +245,7 @@ function abcupdater_check_for_updates( $transient, $type ) {
         }
 
         $release_data = json_decode( wp_remote_retrieve_body( $response ) );
-        if ( ! is_object( $release_data ) || empty( $release_data->tag_name ) || empty( $release_data->assets[0] ) ) {
+        if ( ! is_object( $release_data ) || empty( $release_data->tag_name ) || empty( $release_data->assets ) ) {
             continue;
         }
 
@@ -242,11 +255,17 @@ function abcupdater_check_for_updates( $transient, $type ) {
         if ( version_compare( $new_version, $current_version, '>' ) ) {
             $package_url = $release_data->assets[0]->browser_download_url;
 
-            // For private repos, we need to get a signed URL
+            // For private repos, the browser_download_url is not sufficient.
+            // We must get a signed URL by hitting the asset's API endpoint.
             if ( ! empty( $github_token ) ) {
                 $asset_api_url = $release_data->assets[0]->url;
-                $asset_response = wp_remote_get($asset_api_url, ['timeout' => 60, 'redirection' => 0, 'headers' => ['Accept' => 'application/octet-stream', 'Authorization' => 'token ' . $github_token]]);
-                $package_url = wp_remote_retrieve_header($asset_response, 'location');
+                $asset_headers = ['Accept' => 'application/octet-stream', 'Authorization' => 'token ' . sanitize_text_field($github_token)];
+                // Use a HEAD request to get the redirect location without downloading the file
+                $asset_response = wp_remote_head($asset_api_url, ['headers' => $asset_headers, 'timeout' => 15]);
+                $redirect_url = wp_remote_retrieve_header($asset_response, 'location');
+                if (!empty($redirect_url)) {
+                    $package_url = $redirect_url;
+                }
             }
             
             if ( ! empty($package_url) ) {
@@ -259,8 +278,10 @@ function abcupdater_check_for_updates( $transient, $type ) {
 
                 if ( $type === 'theme' ) {
                     $update_data['theme'] = $local_slug;
-                    $update_data['sections'] = ['description' => $Parsedown->parse($release_data->body)];
                 }
+                
+                // Add changelog/description from the release body
+                $update_data['sections'] = ['description' => $Parsedown->parse($release_data->body)];
                 
                 $transient->response[ $local_slug ] = (object) $update_data;
             }
@@ -271,53 +292,31 @@ function abcupdater_check_for_updates( $transient, $type ) {
 
 add_filter( 'pre_set_site_transient_update_themes', function( $transient ) {
     return abcupdater_check_for_updates( $transient, 'theme' );
-}, 20 );
+}, 20, 1 );
 
 add_filter( 'pre_set_site_transient_update_plugins', function( $transient ) {
     // First, handle the self-update for ABCUPDATER itself
     $transient = abcupdater_check_for_plugin_self_update( $transient );
     // Then, check for other configured plugins
     return abcupdater_check_for_updates( $transient, 'plugin' );
-}, 20 );
+}, 20, 1 );
 
 
 // ===================================================================================
-// 4. THEME UPDATER - SELF-HEALING FUNCTION
+// 4. AJAX HANDLER FOR CONNECTION TEST
 // ===================================================================================
 
-function abcupdater_cleanup_after_theme_update( $response, $hook_extra, $result ) {
-    if ( is_wp_error( $result ) || ! isset( $hook_extra['theme'] ) ) { return $response; }
-    
-    $updated_theme_slug = $hook_extra['theme'];
-    $old_file_path = get_theme_root() . '/' . $updated_theme_slug . '/inc/classes/class-autoupdates.php';
-    if ( file_exists( $old_file_path ) ) { unlink( $old_file_path ); }
-
-    $functions_path = get_theme_root() . '/' . $updated_theme_slug . '/functions.php';
-    if ( is_writable( $functions_path ) ) {
-        $content = file_get_contents( $functions_path );
-        $new_content = preg_replace( "/^.*'class-autoupdates\.php'.*$/m", '', $content );
-        if ( $new_content !== $content ) { file_put_contents( $functions_path, $new_content ); }
-    }
-    return $response;
-}
-add_filter( 'upgrader_post_install', 'abcupdater_cleanup_after_theme_update', 10, 3 );
-
-
-// ===================================================================================
-// 5. AJAX HANDLER FOR CONNECTION TEST
-// ===================================================================================
-
+add_action( 'wp_ajax_abcupdater_test_connection', 'abcupdater_test_connection_ajax_handler' );
 function abcupdater_test_connection_ajax_handler() {
     check_ajax_referer( 'abcupdater_test_connection_nonce', 'nonce' );
 
     $repo = isset( $_POST['repo'] ) ? sanitize_text_field( $_POST['repo'] ) : '';
-    $token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : '';
+    $token = isset( $_POST['token'] ) ? trim( $_POST['token'] ) : '';
 
     if ( empty( $repo ) ) {
         wp_send_json_error( [ 'message' => 'Repository slug is required.' ] );
     }
 
-    // Basic validation for "owner/repo" format
     if ( ! preg_match( '/^[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+$/', $repo ) ) {
         wp_send_json_error( [ 'message' => 'Invalid repository format. Use "owner/repo-name".' ] );
     }
@@ -327,27 +326,29 @@ function abcupdater_test_connection_ajax_handler() {
     $api_url = "https://api.github.com/repos/{$github_user}/{$repo_name}";
     $headers = ['Accept' => 'application/vnd.github.v3+json'];
     if ( ! empty( $token ) ) {
-        $headers['Authorization'] = 'token ' . $token;
+        $headers['Authorization'] = 'token ' . sanitize_text_field($token);
     }
 
     $response = wp_remote_get( $api_url, ['headers' => $headers] );
     $response_code = wp_remote_retrieve_response_code( $response );
+    $response_body = wp_remote_retrieve_body( $response );
+    $data = json_decode($response_body);
 
     if ( $response_code === 200 ) {
-        wp_send_json_success( [ 'message' => 'Connection successful!' ] );
+        wp_send_json_success( [ 'message' => 'Connection successful! Repository found.' ] );
     } elseif ( $response_code === 404 ) {
-        wp_send_json_error( [ 'message' => 'Repository not found. Check the slug.' ] );
+        wp_send_json_error( [ 'message' => 'Repository not found. Check the slug and ensure the token has access.' ] );
     } elseif ( $response_code === 401 ) {
-        wp_send_json_error( [ 'message' => 'Authentication failed. Check your token.' ] );
+        wp_send_json_error( [ 'message' => 'Authentication failed. Check your Personal Access Token.' ] );
     } else {
-        wp_send_json_error( [ 'message' => "Error: Received HTTP code {$response_code}." ] );
+        $error_message = isset($data->message) ? $data->message : "Received HTTP code {$response_code}.";
+        wp_send_json_error( [ 'message' => "Error: " . $error_message ] );
     }
 }
-add_action( 'wp_ajax_abcupdater_test_connection', 'abcupdater_test_connection_ajax_handler' );
 
 
 // ===================================================================================
-// 6. PLUGIN SELF-UPDATER LOGIC
+// 5. PLUGIN SELF-UPDATER LOGIC
 // ===================================================================================
 
 function abcupdater_check_for_plugin_self_update( $transient ) {
@@ -359,6 +360,7 @@ function abcupdater_check_for_plugin_self_update( $transient ) {
     $github_user = 'ABCDO-TN';
     $github_repo = 'ABCUPDATER';
 
+    // Do not use a token for the public self-updater repo
     $api_url = "https://api.github.com/repos/{$github_user}/{$github_repo}/releases/latest";
     $response = wp_remote_get( $api_url );
 
@@ -378,7 +380,8 @@ function abcupdater_check_for_plugin_self_update( $transient ) {
 
     if ( version_compare( $new_version, $current_version, '>' ) ) {
         $transient->response[ $plugin_slug ] = (object) [
-            'slug'        => $plugin_slug,
+            'slug'        => dirname($plugin_slug),
+            'plugin'      => $plugin_slug,
             'new_version' => $new_version,
             'url'         => $release_data->html_url,
             'package'     => $release_data->assets[0]->browser_download_url,
