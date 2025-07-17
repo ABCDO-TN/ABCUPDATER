@@ -34,3 +34,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "abcupdater.zip"
           generateReleaseNotes: true
+          allowUpdates: true # FIX: Allow updating an existing release to prevent "already_exists" error
