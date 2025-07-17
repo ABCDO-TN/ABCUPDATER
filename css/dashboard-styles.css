@@ -1,0 +1,65 @@
+/* ABCUPDATER Dashboard Styles */
+
+.abcupdater-dashboard-wrap {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Match the dark theme from the example */
+.abcupdater-dashboard-wrap #poststuff .postbox {
+    background: #2E3641;
+    border: 1px solid #4B545F;
+    color: #E0E0E0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    border-radius: 3px;
+}
+
+.abcupdater-dashboard-wrap .postbox h2 {
+    background: #38414D;
+    color: #FFFFFF;
+    border-bottom: 1px solid #4B545F;
+    padding: 10px 15px;
+    font-size: 16px;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.abcupdater-dashboard-wrap .postbox .inside {
+    padding: 15px;
+}
+
+.abcupdater-dashboard-wrap .postbox .inside p,
+.abcupdater-dashboard-wrap .postbox .inside ul {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.abcupdater-dashboard-wrap .postbox .inside a {
+    color: #00A0D2;
+    text-decoration: none;
+}
+
+.abcupdater-dashboard-wrap .postbox .inside a:hover {
+    color: #00BFFF;
+}
+
+/* Specific widget styling */
+#postbox-container-1 .postbox .inside ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#postbox-container-1 .postbox .inside li {
+    padding: 8px 0;
+    border-bottom: 1px solid #4B545F;
+}
+
+#postbox-container-1 .postbox .inside li:last-child {
+    border-bottom: none;
+}
+
+#postbox-container-1 .postbox .inside li a::before {
+    content: "\f138"; /* Dashicon for external link */
+    font-family: "dashicons";
+    margin-right: 8px;
+    color: #8A97A6;
+}
