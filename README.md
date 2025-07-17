@@ -1,7 +1,7 @@
 # ABCUPDATER - Advanced WordPress Updater for GitHub
 
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
-![Plugin Version](https://img.shields.io/badge/version-0.12.6-orange)
+![Plugin Version](https://img.shields.io/badge/version-0.13.0-orange)
 ![WordPress Version](https://img.shields.io/badge/WordPress-5.5+-blue)
 ![PHP Version](https://img.shields.io/badge/PHP-7.4+-blueviolet)
 
@@ -53,6 +53,12 @@ A powerful, flexible, and professional WordPress plugin that provides a robust s
 ---
 
 ## Changelog
+
+### 0.13.0 (2025-07-17)
+-   **Feature:** Added a new modern dashboard page for the plugin.
+-   **Feature:** The dashboard now displays the latest news and releases from the official GitHub repository.
+-   **Design:** Implemented a new dark theme for the dashboard interface.
+-   **Process:** Merged `designfeature` branch into `main`.
 
 ### 0.12.6 (2025-07-17)
 -   **Process:** Implemented automated Git workflow for versioning. Commits, tags, and pushes are now handled automatically.
