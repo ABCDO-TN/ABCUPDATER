@@ -1,24 +1,23 @@
-# ABCUPDATER - Advanced WordPress Theme Updater for GitHub
+# ABCUPDATER - Advanced WordPress Updater for GitHub
 
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
-![Plugin Version](https://img.shields.io/badge/version-1.1.0-orange)
+![Plugin Version](https://img.shields.io/badge/version-0.12.5-orange)
 ![WordPress Version](https://img.shields.io/badge/WordPress-5.5+-blue)
 ![PHP Version](https://img.shields.io/badge/PHP-7.4+-blueviolet)
 
-A powerful, flexible, and professional WordPress plugin that provides a robust system for managing automatic updates for private themes hosted on GitHub. Created by **ABCDO & (Gemini Pro 2.5)**.
+A powerful, flexible, and professional WordPress plugin that provides a robust system for managing automatic updates for multiple private themes and plugins hosted on GitHub. Created by **ABCDO**.
 
 ---
 
 ## Key Features
 
--   **Live Settings Validation:** Test your connection details in real-time before saving to ensure your token, theme folder, and repository are all correct.
--   **Self-Updating Plugin:** The ABCUPDATER plugin itself can be updated directly from its public GitHub repository.
--   **Private Theme Updates:** Securely fetches updates for your private themes from GitHub using a Personal Access Token.
--   **Dynamic Theme Mapping:** Link any local theme folder to any GitHub repository.
--   **White-Labeled UI:** A clean, user-friendly settings page without technical jargon.
--   **Markdown Changelog Parsing:** Automatically displays your GitHub Release notes as a clean changelog.
--   **Self-Healing Mechanism:** Automatically cleans up conflicting code from themes after an update.
--   **Environment Checks:** Prevents activation on servers that do not meet minimum requirements.
+-   **Multi-Project Management:** Manage updates for an unlimited number of themes and plugins from a single, unified interface.
+-   **Dynamic Project Configuration:** Add, remove, and configure each project (theme or plugin) independently.
+-   **Live Connection Testing:** Test the connection for each project individually to ensure your token, slug, and repository are all correct before saving.
+-   **Self-Updating Plugin:** The ABCUPDATER plugin itself updates directly from its public GitHub repository.
+-   **Private Repository Support:** Securely fetches updates from private GitHub repositories using a Personal Access Token.
+-   **Markdown Changelog Parsing:** Automatically displays your GitHub Release notes as a clean changelog in the update details view.
+-   **Environment Checks:** Prevents activation on servers that do not meet minimum WordPress and PHP requirements.
 
 ---
 
@@ -31,35 +30,36 @@ A powerful, flexible, and professional WordPress plugin that provides a robust s
 
 ## Installation
 
-1.  **Prepare the Plugin Folder:** Your plugin folder must contain the main file, the Parsedown library, and an `assets` folder for the icon.
-    ```
-    /abcupdater/
-        ├── assets/
-        │   └── icon-256x256.jpg  <-- (or .png)
-        ├── js/
-        │   └── admin-scripts.js
-        ├── Parsedown.php
-        └── abcupdater.php
-    ```
-2.  **Install on WordPress:** Compress the `abcupdater` folder into a `.zip` file and upload it via **Plugins > Add New > Upload Plugin**.
+1.  **Download the Plugin:** Download the latest release from the [GitHub Releases page](https://github.com/ABCDO-TN/ABCUPDATER/releases).
+2.  **Install on WordPress:** Upload the downloaded `.zip` file via **Plugins > Add New > Upload Plugin**.
+3.  **Activate** the plugin.
 
 ---
 
-## Configuration & Validation
+## Configuration
 
-1.  Navigate to **Settings -> Theme Update Manager**.
-2.  Fill in the three fields: Local Theme Folder, GitHub Repository, and License Key.
-3.  **Click the "Test Connection" button.** The plugin will perform a live check:
-    -   It verifies that the theme folder exists on your WordPress site.
-    -   It verifies that the GitHub repository exists.
-    -   It verifies that your License Key (Token) is valid and has access to the repository.
-4.  You will receive an instant success or a specific error message.
-5.  Once the connection is successful, click **"Save Settings"**.
+1.  Navigate to **Settings -> Update Manager**.
+2.  Click **"Add Project"** to create a new configuration block.
+3.  For each project, fill in the required fields:
+    *   **Project Type:** Select "Theme" or "Plugin".
+    *   **Local Directory / Plugin File (Slug):**
+        *   For a theme, enter its folder name (e.g., `my-theme`).
+        *   For a plugin, enter its main file path (e.g., `my-plugin/my-plugin.php`).
+    *   **GitHub Repository:** The repository slug in `owner/repo-name` format.
+    *   **GitHub Personal Access Token:** Your token with `repo` access for private repositories.
+4.  Use the **"Test Connection"** button to validate each project's settings.
+5.  Click **"Save Settings"** when you are done.
 
 ---
 
-## How to Publish Updates
+## Changelog
 
-(The process for publishing theme and plugin updates remains the same.)
+### 0.12.5 (2025-07-17)
+-   **Fix:** Corrected an issue where the plugin icon was not displaying on the WordPress updates page.
+-   **Fix:** Resolved the "Invalid plugin slug" error when viewing update details for the self-updater. The details modal now correctly displays the description and changelog.
+-   **Enhancement:** The author's name in the update details view is now a clickable link to their profile.
 
-... (le reste du README.md reste identique) ...
+### 0.12.0 - 1.0.0 (Internal Refactoring)
+-   **Feature:** Complete architectural refactoring to support multi-project updates. The plugin can now manage updates for multiple themes and plugins simultaneously.
+-   **Feature:** Redesigned the admin interface to be fully dynamic, allowing users to add, remove, and test projects without page reloads.
+-   **Code:** Modernized PHP and JavaScript codebase for better performance and maintainability.

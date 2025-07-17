@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       ABCUPDATER
  * Description:       Manages automatic updates for multiple themes and plugins from private or public GitHub repositories.
- * Version:           0.12.4
+ * Version:           0.12.5
  * Requires at least: 5.5
  * Requires PHP:      7.4
  * Plugin URI:        http://abcdo.tn/abcupdater
@@ -379,12 +379,27 @@ function abcupdater_check_for_plugin_self_update( $transient ) {
     $new_version = ltrim( $release_data->tag_name, 'v' );
 
     if ( version_compare( $new_version, $current_version, '>' ) ) {
+        if ( ! class_exists( 'Parsedown' ) ) {
+            require_once plugin_dir_path( __FILE__ ) . 'Parsedown.php';
+        }
+        $Parsedown = new Parsedown();
+
         $transient->response[ $plugin_slug ] = (object) [
-            'slug'        => dirname($plugin_slug),
+            'slug'        => $plugin_slug, // FIX: Use the full plugin slug for details view
             'plugin'      => $plugin_slug,
             'new_version' => $new_version,
             'url'         => $release_data->html_url,
             'package'     => $release_data->assets[0]->browser_download_url,
+            'icons' => [
+                '1x' => 'https://raw.githubusercontent.com/ABCDO-TN/ABCUPDATER/main/assets/icon-128x128.jpg',
+                '2x' => 'https://raw.githubusercontent.com/ABCDO-TN/ABCUPDATER/main/assets/icon-256x256.jpg',
+            ],
+            'sections'    => [
+                'description' => $plugin_data['Description'],
+                'changelog'   => $Parsedown->parse($release_data->body)
+            ],
+            'author'      => '<a href="' . esc_url($plugin_data['AuthorURI']) . '">' . esc_html($plugin_data['Author']) . '</a>',
+            'author_profile' => $plugin_data['AuthorURI'],
         ];
     }
 
