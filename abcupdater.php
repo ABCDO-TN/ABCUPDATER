@@ -41,7 +41,24 @@ function abcupdater_activation_check() {
 
 add_action( 'admin_menu', 'abcupdater_add_admin_menu' );
 function abcupdater_add_admin_menu() {
-    add_options_page('Update Manager', 'Update Manager', 'manage_options', 'abcupdater_settings', 'abcupdater_settings_page_html');
+    add_menu_page(
+        'ABCUPDATER Dashboard',
+        'ABCUPDATER',
+        'manage_options',
+        'abcupdater_dashboard',
+        'abcupdater_dashboard_page_html',
+        'dashicons-update-alt',
+        30
+    );
+
+    add_submenu_page(
+        'abcupdater_dashboard',
+        'Settings',
+        'Settings',
+        'manage_options',
+        'abcupdater_settings',
+        'abcupdater_settings_page_html'
+    );
 }
 
 add_action( 'admin_init', 'abcupdater_settings_init' );
@@ -124,11 +141,71 @@ function abcupdater_projects_field_html() {
     <?php
 }
 
+function abcupdater_dashboard_page_html() {
+    ?>
+    <div class="wrap abcupdater-dashboard-wrap">
+        <h1>ABCUPDATER Dashboard</h1>
+        <div id="poststuff">
+            <div id="post-body" class="metabox-holder columns-2">
+                <!-- Main Content -->
+                <div id="post-body-content">
+                    <div class="meta-box-sortables ui-sortable">
+                        <div class="postbox">
+                            <h2><span>Welcome to ABCUPDATER</span></h2>
+                            <div class="inside">
+                                <p>This is your central hub for managing all theme and plugin updates from GitHub. Use the settings page to configure your projects.</p>
+                            </div>
+                        </div>
+                        <div class="postbox">
+                            <h2><span>Managed Projects</span></h2>
+                            <div class="inside">
+                                <?php
+                                $options = get_option('abcupdater_settings');
+                                $projects = isset($options['projects']) && is_array($options['projects']) ? $options['projects'] : [];
+                                if (empty($projects)) {
+                                    echo '<p>No projects configured. <a href="' . admin_url('admin.php?page=abcupdater_settings') . '">Go to settings to add one.</a></p>';
+                                } else {
+                                    echo '<p>You are currently managing ' . count($projects) . ' project(s).</p>';
+                                    // A full list will be implemented here later.
+                                }
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sidebar -->
+                <div id="postbox-container-1" class="postbox-container">
+                    <div class="meta-box-sortables">
+                        <div class="postbox">
+                            <h2><span>ABCUPDATER News</span></h2>
+                            <div class="inside">
+                                <p>Fetching latest news...</p>
+                                <!-- News content will be loaded here via AJAX -->
+                            </div>
+                        </div>
+                        <div class="postbox">
+                            <h2><span>Quick Links</span></h2>
+                            <div class="inside">
+                                <ul>
+                                    <li><a href="https://github.com/ABCDO-TN/ABCUPDATER" target="_blank">GitHub Repository</a></li>
+                                    <li><a href="<?php echo admin_url('admin.php?page=abcupdater_settings'); ?>">Settings</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br class="clear">
+        </div>
+    </div>
+    <?php
+}
+
 function abcupdater_settings_page_html() {
     if ( ! current_user_can( 'manage_options' ) ) { return; }
     ?>
     <div class="wrap">
-        <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+        <h1>Update Manager Settings</h1>
         <p>This system allows for secure, direct updates for your themes and plugins from private or public GitHub repositories.</p>
         <form action="options.php" method="post">
             <?php
@@ -151,12 +228,30 @@ function abcupdater_settings_page_html() {
 
 add_action( 'admin_enqueue_scripts', 'abcupdater_enqueue_admin_scripts' );
 function abcupdater_enqueue_admin_scripts( $hook ) {
-    if ( 'settings_page_abcupdater_settings' !== $hook ) {
+    // Load on all ABCUPDATER pages
+    if ( strpos($hook, 'abcupdater_') === false ) {
         return;
     }
-    // Use the correct path for the js file
-    wp_enqueue_script( 'abcupdater-admin-js', plugins_url( 'js/admin-scripts.js', __FILE__ ), [ 'jquery' ], '1.0.0', true );
-    wp_localize_script( 'abcupdater-admin-js', 'abcupdater_ajax', [
+
+    // Enqueue dashboard-specific styles and scripts
+    if ($hook === 'toplevel_page_abcupdater_dashboard') {
+        wp_enqueue_style('abcupdater-dashboard-styles', plugins_url('css/dashboard-styles.css', __FILE__), [], '0.13.0');
+        wp_enqueue_script('abcupdater-dashboard-js', plugins_url('js/dashboard-scripts.js', __FILE__), ['jquery'], '0.13.0', true);
+        wp_localize_script('abcupdater-dashboard-js', 'abcupdater_dashboard_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('abcupdater_dashboard_nonce'),
+        ]);
+    }
+    
+    // Load admin scripts only on the settings page
+    if ($hook === 'abcupdater_page_abcupdater_settings') {
+        wp_enqueue_script( 'abcupdater-admin-js', plugins_url( 'js/admin-scripts.js', __FILE__ ), [ 'jquery' ], '1.0.0', true );
+        wp_localize_script( 'abcupdater-admin-js', 'abcupdater_ajax', [
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'abcupdater_test_connection_nonce' ),
+        ]);
+    }
+}
         'ajax_url' => admin_url( 'admin-ajax.php' ),
         'nonce'    => wp_create_nonce( 'abcupdater_test_connection_nonce' ),
     ]);
@@ -303,8 +398,28 @@ add_filter( 'pre_set_site_transient_update_plugins', function( $transient ) {
 
 
 // ===================================================================================
-// 4. AJAX HANDLER FOR CONNECTION TEST
+// 4. AJAX HANDLERS
 // ===================================================================================
+
+add_action('wp_ajax_abcupdater_get_latest_news', 'abcupdater_get_latest_news_ajax_handler');
+function abcupdater_get_latest_news_ajax_handler() {
+    check_ajax_referer('abcupdater_dashboard_nonce', 'nonce');
+
+    $api_url = "https://api.github.com/repos/ABCDO-TN/ABCUPDATER/releases?per_page=5";
+    $response = wp_remote_get($api_url);
+
+    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+        wp_send_json_error(['message' => 'Could not fetch news from GitHub.']);
+    }
+
+    $releases = json_decode(wp_remote_retrieve_body($response));
+
+    if (empty($releases)) {
+        wp_send_json_error(['message' => 'No releases found.']);
+    }
+
+    wp_send_json_success($releases);
+}
 
 add_action( 'wp_ajax_abcupdater_test_connection', 'abcupdater_test_connection_ajax_handler' );
 function abcupdater_test_connection_ajax_handler() {
