@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       ABCUPDATER
  * Description:       Manages automatic updates for multiple themes and plugins from private or public GitHub repositories.
- * Version:           0.13.2
+ * Version:           0.13.3
  * Requires at least: 5.5
  * Requires PHP:      7.4
  * Plugin URI:        http://abcdo.tn/abcupdater
@@ -251,10 +251,6 @@ function abcupdater_enqueue_admin_scripts( $hook ) {
             'nonce'    => wp_create_nonce( 'abcupdater_test_connection_nonce' ),
         ]);
     }
-}
-        'ajax_url' => admin_url( 'admin-ajax.php' ),
-        'nonce'    => wp_create_nonce( 'abcupdater_test_connection_nonce' ),
-    ]);
 }
 
 function abcupdater_sanitize_settings( $input ) {
