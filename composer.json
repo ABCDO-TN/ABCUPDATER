@@ -1,0 +1,23 @@
+{
+    "name": "abcdotn/abcupdater",
+    "description": "A WordPress plugin for ABCUPDATER.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "ABCDO-TN",
+            "email": "contact@abcdotn.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7",
+        "wp-coding-standards/wpcs": "^2.3"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

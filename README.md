@@ -76,3 +76,28 @@ A powerful, flexible, and professional WordPress plugin that provides a robust s
 -   **Feature:** Complete architectural refactoring to support multi-project updates. The plugin can now manage updates for multiple themes and plugins simultaneously.
 -   **Feature:** Redesigned the admin interface to be fully dynamic, allowing users to add, remove, and test projects without page reloads.
 -   **Code:** Modernized PHP and JavaScript codebase for better performance and maintainability.
+
+---
+
+## Code Analysis (For Developers)
+
+This project uses `PHP_CodeSniffer` with the WordPress Coding Standards to ensure code quality, security, and performance.
+
+### Setup
+
+1.  Ensure you have [Composer](https://getcomposer.org/) installed.
+2.  From the root directory of this plugin, run:
+    ```bash
+    composer install
+    ```
+    This will install `PHP_CodeSniffer` and the WordPress Coding Standards into the `vendor/` directory.
+
+### Usage
+
+To run the code analysis, execute the following command from the plugin's root directory:
+
+```bash
+./vendor/bin/phpcs
+```
+
+This command will scan all PHP files in the plugin and report any violations of the WordPress Coding Standards.

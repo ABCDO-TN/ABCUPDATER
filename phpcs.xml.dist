@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<ruleset name="ABCUPDATER">
+    <description>PHP_CodeSniffer ruleset for the ABCUPDATER plugin.</description>
+
+    <!-- Use the WordPress Coding Standards -->
+    <rule ref="WordPress"/>
+
+    <!-- Scan all PHP files in the current directory and subdirectories -->
+    <file>.</file>
+
+    <!-- Exclude the Composer vendor directory -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <!-- Exclude specific files or directories if needed -->
+    <!-- <exclude-pattern>*/tests/*</exclude-pattern> -->
+    <!-- <exclude-pattern>*/build/*</exclude-pattern> -->
+
+    <!-- Show sniff names in the report -->
+    <arg value="s"/>
+
+    <!-- Show progress -->
+    <arg value="p"/>
+
+    <!-- Set the tab width for consistency -->
+    <arg name="tab-width" value="4"/>
+
+    <!-- Enable colors in the output -->
+    <arg name="colors"/>
+
+    <!-- Define custom properties for sniffs if necessary -->
+    <!-- <rule ref="WordPress.Files.FileName.NotHyphenated"> -->
+    <!--     <properties> -->
+    <!--         <property name="strict" value="false"/> -->
+    <!--     </properties> -->
+    <!-- </rule> -->
+</ruleset>
