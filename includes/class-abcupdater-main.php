@@ -68,7 +68,7 @@ class ABCUPDATER_Main {
      */
     private function define_constants() {
         if ( ! defined( 'ABCUPDATER_VERSION' ) ) {
-            define( 'ABCUPDATER_VERSION', '0.13.3' );
+            define( 'ABCUPDATER_VERSION', '0.13.5' );
         }
         if ( ! defined( 'ABCUPDATER_PLUGIN_DIR' ) ) {
             define( 'ABCUPDATER_PLUGIN_DIR', plugin_dir_path( ABCUPDATER_PLUGIN_FILE ) );

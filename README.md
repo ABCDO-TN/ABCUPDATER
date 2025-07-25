@@ -1,7 +1,7 @@
 # ABCUPDATER - Advanced WordPress Updater for GitHub
 
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
-![Plugin Version](https://img.shields.io/badge/version-0.13.3-orange)
+![Plugin Version](https://img.shields.io/badge/version-0.13.5-orange)
 ![WordPress Version](https://img.shields.io/badge/WordPress-5.5+-blue)
 ![PHP Version](https://img.shields.io/badge/PHP-7.4+-blueviolet)
 
@@ -53,6 +53,9 @@ A powerful, flexible, and professional WordPress plugin that provides a robust s
 ---
 
 ## Changelog
+
+### 0.13.5 (2025-07-25)
+-   **Task:** Complete project analysis and version bump.
 
 ### 0.13.3 (2025-07-17)
 -   **Fix:** Resolved a fatal PHP parse error caused by a stray code block.
