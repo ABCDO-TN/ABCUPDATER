@@ -5,7 +5,16 @@
 ![WordPress Version](https://img.shields.io/badge/WordPress-5.5+-blue)
 ![PHP Version](https://img.shields.io/badge/PHP-7.4+-blueviolet)
 
-A powerful, flexible, and professional WordPress plugin that provides a robust system for managing automatic updates for multiple private themes and plugins hosted on GitHub. Created by **ABCDO**.
+Welcome to ABCUPDATER! This powerful, flexible, and professional WordPress plugin provides a robust system for managing automatic updates for multiple private themes and plugins hosted on GitHub. Created with ❤️ by **ABCDO**.
+
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Changelog](#changelog)
+- [Code Analysis (For Developers)](#code-analysis-for-developers)
 
 ---
 
@@ -84,7 +93,7 @@ A powerful, flexible, and professional WordPress plugin that provides a robust s
 
 ## Code Analysis (For Developers)
 
-This project uses `PHP_CodeSniffer` with the WordPress Coding Standards to ensure code quality, security, and performance.
+This project uses `PHP_CodeSniffer` with the WordPress Coding Standards to ensure code quality, security, and performance. The configuration is defined in [`phpcs.xml.dist`](phpcs.xml.dist) and dependencies are managed via [`composer.json`](composer.json).
 
 ### Setup
 
